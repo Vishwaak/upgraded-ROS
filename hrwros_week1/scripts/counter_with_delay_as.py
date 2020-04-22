@@ -30,17 +30,14 @@ class CounterWithDelayActionClass(object):
     def execute_cb(self, goal):
 
         counter_delay_value = 1.0
-        ## Assignment 3 - Part3
-        ## modify counter delay using a private parameter .
-        ## Uncomment the following lines (37-41) and modify them acordingly
+        
 
-        # if rospy.has_param("<write your code here>"):
-        #     counter_delay_value = rospy.get_param("<write your code here>")
-        #     rospy.loginfo("Parameter %s was found on the parameter server. Using %fs for counter delay."%("counter_delay", counter_delay_value))
-        # else:
-        #     rospy.loginfo("Parameter %s not found on the parameter server. Using default value of 1.0s for counter delay.","counter_delay")
+        if rospy.has_param("counter_delay"):
+             counter_delay_value = rospy.get_param("~counter_delay")
+             rospy.loginfo("Parameter %s was found on the parameter server. Using %fs for counter delay."%("counter_delay", counter_delay_value))
+        else:
+             rospy.loginfo("Parameter %s not found on the parameter server. Using default value of 1.0s for counter delay.","counter_delay")
 
-        ##  End of Assignment 3 - Part3
 
         # Variable for delay
         delay_rate = rospy.Rate(counter_delay_value)
