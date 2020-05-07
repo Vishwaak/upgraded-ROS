@@ -54,9 +54,9 @@ def simple_pick_place():
   ## Instantiate a MoveGroupCommander object.  This object is an interface
   ## to one group of joints.  In this case the group refers to the joints of
   ## robot1. This interface can be used to plan and execute motions on robot1.
-  robot1_group = moveit_commander.MoveGroupCommander("robot1")
+  robot1_group = moveit_commander.MoveGroupCommander("robot1_group")
   ## MoveGroup Commander Object for robot2.
-  robot2_group = moveit_commander.MoveGroupCommander("robot2")
+  robot2_group = moveit_commander.MoveGroupCommander("robot2_group")
 
   ## Action clients to the ExecuteTrajectory action server.
   robot1_client = actionlib.SimpleActionClient('execute_trajectory',
