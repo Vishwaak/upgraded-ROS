@@ -6,27 +6,29 @@
 # Only code inside the [MANUAL] tags will be kept.        #
 ###########################################################
 
-import roslib; roslib.load_manifest('behavior_final_project')
 from flexbe_core import Behavior, Autonomy, OperatableStateMachine, ConcurrencyContainer, PriorityContainer, Logger
-from hrwros_factory_states.srdf_state_to_moveit import SrdfStateToMoveit
+from flexbe_manipulation_states.srdf_state_to_moveit import SrdfStateToMoveit as flexbe_manipulation_states__SrdfStateToMoveit
 from hrwros_factory_states.compute_grasp_state import ComputeGraspState
-from hrwros_factory_states.moveit_to_joints_dyn_state import MoveitToJointsDynState
 from hrwros_factory_states.control_feeder_state import ControlFeederState
 from hrwros_factory_states.vacuum_gripper_control_state import VacuumGripperControlState
 from hrwros_factory_states.locate_factory_device_state import LocateFactoryDeviceState
 from hrwros_factory_states.detect_part_camera_state import DetectPartCameraState
 from flexbe_states.subscriber_state import SubscriberState
-from hrwros_factory_states.set_conveyor_power_state import SetConveyorPowerState
+from hrwros_factory_states.moveit_to_joints_dyn_state import MoveitToJointsDynState as hrwros_factory_states__MoveitToJointsDynState
+# Additional imports can be added inside the following tags
+# [MANUAL_IMPORT]
+from geometry_msgs.msg import Pose2D
+
+# [/MANUAL_IMPORT]
+
+
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
 from geometry_msgs.msg import Pose2D
 # [/MANUAL_IMPORT]
 
 
-'''
-Created on Sun Oct 07 2018
-@author: Carlos Hernandez
-'''
+
 class FinalProjectSM(Behavior):
 	'''
 	Final project for the MOOC Hello (Real) World with ROS

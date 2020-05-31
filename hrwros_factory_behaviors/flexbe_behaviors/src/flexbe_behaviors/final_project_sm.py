@@ -16,6 +16,7 @@ from hrwros_factory_states.locate_factory_device_state import LocateFactoryDevic
 from hrwros_factory_states.detect_part_camera_state import DetectPartCameraState
 from flexbe_states.subscriber_state import SubscriberState
 from hrwros_factory_states.moveit_to_joints_dyn_state import MoveitToJointsDynState as hrwros_factory_states__MoveitToJointsDynState
+from hrwros_factory_states.set_conveyor_power_state import SetConveyorPowerState
 # Additional imports can be added inside the following tags
 # [MANUAL_IMPORT]
 from geometry_msgs.msg import Pose2D
@@ -24,7 +25,7 @@ from geometry_msgs.msg import Pose2D
 
 
 '''
-Created on 
+Created on Sun Oct 07 2018
 @author: you
 '''
 class FinalProjectSM(Behavior):
@@ -56,13 +57,15 @@ The three robots in the factory move to process the parts
 		pick1_group = 'robot1'
 		robot1_loc = Pose2D(x=3.8, y=2.1, theta=-90.0)
 		gripper1 = "vacuum_gripper1_suction_cup"
-		# x:31 y:236, x:594 y:345
+		pick2_group = 'robot2'
+		# x:31 y:302, x:594 y:345
 		_state_machine = OperatableStateMachine(outcomes=['finished', 'failed'])
 		_state_machine.userdata.part_pose = []
 		_state_machine.userdata.robot1_loc = robot1_loc
 		_state_machine.userdata.pose_turtlebot = []
 		_state_machine.userdata.pick1_configuration = []
 		_state_machine.userdata.place1_configuration = []
+		_state_machine.userdata.speed = '100'
 
 		# Additional creation code can be added inside the following tags
 		# [MANUAL_CREATE]
@@ -74,7 +77,7 @@ The three robots in the factory move to process the parts
 			# x:32 y:56
 			OperatableStateMachine.add('Move R1 Home',
 										flexbe_manipulation_states__SrdfStateToMoveit(config_name='R1Home', move_group=pick1_group, action_topic='/move_group', robot_name=''),
-										transitions={'reached': 'Start feeder', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
+										transitions={'reached': 'Deactivate Gripper 1', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
 										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
 										remapping={'config_name': 'config_name', 'move_group': 'move_group', 'robot_name': 'robot_name', 'action_topic': 'action_topic', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
@@ -94,7 +97,7 @@ The three robots in the factory move to process the parts
 			# x:718 y:59
 			OperatableStateMachine.add('Stop feeder',
 										ControlFeederState(activation=False),
-										transitions={'succeeded': 'Detect Part Camera', 'failed': 'failed'},
+										transitions={'succeeded': 'end_conveyer', 'failed': 'failed'},
 										autonomy={'succeeded': Autonomy.Off, 'failed': Autonomy.Off})
 
 			# x:1104 y:222
@@ -120,7 +123,7 @@ The three robots in the factory move to process the parts
 			# x:1125 y:370
 			OperatableStateMachine.add('Move R1 back Home',
 										flexbe_manipulation_states__SrdfStateToMoveit(config_name='R1Home', move_group=pick1_group, action_topic='/move_group', robot_name=''),
-										transitions={'reached': 'finished', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
+										transitions={'reached': 'LocateTurtlebot', 'planning_failed': 'failed', 'control_failed': 'failed', 'param_error': 'failed'},
 										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off, 'param_error': Autonomy.Off},
 										remapping={'config_name': 'config_name', 'move_group': 'move_group', 'robot_name': 'robot_name', 'action_topic': 'action_topic', 'joint_values': 'joint_values', 'joint_names': 'joint_names'})
 
@@ -158,6 +161,26 @@ The three robots in the factory move to process the parts
 										transitions={'reached': 'finished', 'planning_failed': 'failed', 'control_failed': 'failed'},
 										autonomy={'reached': Autonomy.Off, 'planning_failed': Autonomy.Off, 'control_failed': Autonomy.Off},
 										remapping={'joint_values': 'place1_configuration', 'joint_names': 'joint_names'})
+
+			# x:234 y:14
+			OperatableStateMachine.add('Start_conveyer',
+										SetConveyorPowerState(stop=False),
+										transitions={'succeeded': 'Start feeder', 'failed': 'failed'},
+										autonomy={'succeeded': Autonomy.Off, 'failed': Autonomy.Off},
+										remapping={'speed': 'speed'})
+
+			# x:873 y:0
+			OperatableStateMachine.add('end_conveyer',
+										SetConveyorPowerState(stop=True),
+										transitions={'succeeded': 'Detect Part Camera', 'failed': 'failed'},
+										autonomy={'succeeded': Autonomy.Off, 'failed': Autonomy.Off},
+										remapping={'speed': 'speed'})
+
+			# x:162 y:141
+			OperatableStateMachine.add('Deactivate Gripper 1',
+										VacuumGripperControlState(enable=True, service_name='/gripper1/control'),
+										transitions={'continue': 'Start_conveyer', 'failed': 'failed'},
+										autonomy={'continue': Autonomy.Off, 'failed': Autonomy.Off})
 
 
 		return _state_machine
